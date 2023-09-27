@@ -1,13 +1,15 @@
 import tkinter
 from PIL import ImageTk
 from PIL import Image
+from cryptography.fernet import Fernet
+import os
 
 def Arayuz():
 
     arayuz = tkinter.Tk()
     arayuz.title("Secret Notes")
     arayuz.config(bg="#c0c0c0")
-    arayuz.wm_minsize(400,600)
+    arayuz.wm_minsize(400,640)
 
 Arayuz()
 def ImageArayuz():
@@ -41,7 +43,7 @@ def BaslikEntry():
                        justify="center",
                        font=("Times New Roman",14))
     baslikIcerigi.focus()
-    baslikIcerigi.place(x= 90, y=175)
+    baslikIcerigi.place(x=90, y=175)
 
 BaslikEntry()
 
@@ -67,17 +69,29 @@ def IcerikText():
 
 IcerikText()
 
-def KayıtButonu():
-    kayitButonu = tkinter.Button()
-    kayitButonu.config(text="Şifrele ve Kaydet",
-                       width=25,
-                       font=("Arial",9,"bold"),
-                       bg="yellow")
-                       #command=#islemyapılacakfonksiyon)
+def sıfreLabel():
+    konuLabel = tkinter.Label()
+    konuLabel.config(bg="#c0c0c0",
+                    text="Şifrenizi Giriniz",
+                    font=("Times New Roman", 17))
+    konuLabel.place(x=130, y=475)
 
-    kayitButonu.place(x=108, y=475)
+sıfreLabel()
+def sıfreEntry():
+    global girilecekSifre
+    girilecekSifre = tkinter.Entry()
 
-KayıtButonu()
+    girilecekSifre = tkinter.Entry()
+    girilecekSifre.config(width=24,
+                       bd=3,
+                       fg="black",
+                       justify="center",
+                       font=("Times New Roman",14))
+    girilecekSifre.place(x= 90, y=505)
+
+sıfreEntry()
+
+
 
 def CozumleButonu():
     cozumButonu = tkinter.Button()
@@ -87,8 +101,29 @@ def CozumleButonu():
                        bg="yellow")
                        #command=#islemyapılacakfonksiyon)
 
-    cozumButonu.place(x=108, y=525)
+    cozumButonu.place(x=108, y=585)
 CozumleButonu()
+
+
+def sifreleVeKaydetButonu():
+
+    konuMetniniGetir = baslikIcerigi.get()
+    with open(r"C:\Users\VICTUS\PycharmProjects\SecretNotes\Sifreli_Icerik.txt", mode="a") as dosyaYazma:
+        dosyaYazma.write(konuMetniniGetir +"\n")
+
+def KayıtButonu():
+    kayitButonu = tkinter.Button()
+    kayitButonu.config(text="Şifrele ve Kaydet",
+                       width=25,
+                       font=("Arial",9,"bold"),
+                       bg="yellow",
+                       command=sifreleVeKaydetButonu)
+
+    kayitButonu.place(x=108, y=545)
+
+KayıtButonu()
+
+sifreleVeKaydetButonu()
 
 
 
