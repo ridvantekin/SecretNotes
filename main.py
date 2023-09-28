@@ -2,7 +2,8 @@ import tkinter
 from PIL import ImageTk
 from PIL import Image
 from cryptography.fernet import Fernet
-import os
+from tkinter import messagebox
+
 
 def Arayuz():
 
@@ -77,19 +78,68 @@ def sıfreLabel():
     konuLabel.place(x=130, y=475)
 
 sıfreLabel()
+
+def UyarıArayuz():
+
+    messagebox.showwarning(title="Geçersiz Değer", message="Değerleri Kontrol Edin")
+
+
+
+def sifreleVeKaydetButonu():
+    global dogrusifre
+    dogrusifre = "ridvan"
+    global sifre
+    sifre = girilecekSifre.get()
+    global fernet
+    global sifrelenmisMesaj
+
+
+    konuMetniniGetir = baslikIcerigi.get()
+    textMetniniGetir = icerikText.get("1.0", "end-1c")
+
+    key = Fernet.generate_key()
+    fernet = Fernet(key)
+    sifrelenmisMesaj = fernet.encrypt(textMetniniGetir.encode())
+
+    if dogrusifre == sifre:
+        with open(r"C:\Users\VICTUS\PycharmProjects\SecretNotes\Sifreli_Icerik.txt", mode="a") as dosyaYazdır:
+            dosyaYazdır.write(konuMetniniGetir + "\n" + "\n")
+
+        with open(r"C:\Users\VICTUS\PycharmProjects\SecretNotes\Sifreli_Icerik.txt", mode="a") as dosyaYazma:
+                dosyaYazma.write(str(sifrelenmisMesaj, "utf-8") + "\n")
+    else:
+        UyarıArayuz()
+
+
 def sıfreEntry():
     global girilecekSifre
-    girilecekSifre = tkinter.Entry()
 
     girilecekSifre = tkinter.Entry()
     girilecekSifre.config(width=24,
-                       bd=3,
-                       fg="black",
-                       justify="center",
-                       font=("Times New Roman",14))
+                          bd=3,
+                          fg="black",
+                          justify="center",
+                          font=("Times New Roman",14))
     girilecekSifre.place(x= 90, y=505)
 
 sıfreEntry()
+
+
+def sifreCoz():
+    textMetniniGetir = icerikText.get("1.0", "end-1c")
+
+    if dogrusifre == sifre:
+        if sifrelenmisMesaj:
+            try:
+                cozumlenmisMesaj = fernet.decrypt(sifrelenmisMesaj).decode()
+
+                icerikText.delete("1.0", "end-1c")
+                icerikText.insert("1.0", cozumlenmisMesaj)
+            except Exception as e:
+                UyarıArayuz()
+
+    else:
+        UyarıArayuz()
 
 
 
@@ -98,20 +148,14 @@ def CozumleButonu():
     cozumButonu.config(text="Çözümle",
                        width=25,
                        font=("Arial",9,"bold"),
-                       bg="yellow")
-                       #command=#islemyapılacakfonksiyon)
+                       bg="yellow",
+                       command=sifreCoz)
 
     cozumButonu.place(x=108, y=585)
 CozumleButonu()
 
-
-def sifreleVeKaydetButonu():
-
-    konuMetniniGetir = baslikIcerigi.get()
-    with open(r"C:\Users\VICTUS\PycharmProjects\SecretNotes\Sifreli_Icerik.txt", mode="a") as dosyaYazma:
-        dosyaYazma.write(konuMetniniGetir +"\n")
-
 def KayıtButonu():
+
     kayitButonu = tkinter.Button()
     kayitButonu.config(text="Şifrele ve Kaydet",
                        width=25,
@@ -123,11 +167,6 @@ def KayıtButonu():
 
 KayıtButonu()
 
-sifreleVeKaydetButonu()
-
-
-
-
-
+#sifreleVeKaydetButonu()
 
 tkinter.mainloop()
