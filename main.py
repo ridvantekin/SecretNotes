@@ -102,15 +102,22 @@ def sifreleVeKaydetButonu():
     sifrelenmisMesaj = fernet.encrypt(textMetniniGetir.encode())
 
     if dogrusifre == sifre:
-        with open(r"C:\Users\VICTUS\PycharmProjects\SecretNotes\Sifreli_Icerik.txt", mode="a") as dosyaYazdır:
-            dosyaYazdır.write(konuMetniniGetir + "\n" + "\n")
+        
+        try:
 
-        with open(r"C:\Users\VICTUS\PycharmProjects\SecretNotes\Sifreli_Icerik.txt", mode="a") as dosyaYazma:
-                dosyaYazma.write(str(sifrelenmisMesaj, "utf-8") + "\n")
+            with open(r"C:\Users\VICTUS\PycharmProjects\SecretNotes\Sifreli_Icerik.txt", mode="a") as dosyaYazdır:
+                    dosyaYazdır.write(konuMetniniGetir + "\n" + "\n")
+
+            with open(r"C:\Users\VICTUS\PycharmProjects\SecretNotes\Sifreli_Icerik.txt", mode="a") as dosyaYazma:
+                        dosyaYazma.write(str(sifrelenmisMesaj, "utf-8") + "\n" + "\n")
+        except FileNotFoundError:
+            UyarıArayuz()
+        finally:
+            baslikIcerigi.delete(0,"end")
+            icerikText.delete(1.0,"end")
+            girilecekSifre.delete(0,"end")
     else:
         UyarıArayuz()
-
-
 def sıfreEntry():
     global girilecekSifre
 
@@ -126,10 +133,12 @@ sıfreEntry()
 
 
 def sifreCoz():
+
     textMetniniGetir = icerikText.get("1.0", "end-1c")
 
     if dogrusifre == sifre:
-        if sifrelenmisMesaj:
+
+        if textMetniniGetir == sifrelenmisMesaj:
             try:
                 cozumlenmisMesaj = fernet.decrypt(sifrelenmisMesaj).decode()
 
