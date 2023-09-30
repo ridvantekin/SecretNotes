@@ -1,8 +1,8 @@
 import tkinter
 from PIL import ImageTk
 from PIL import Image
-from cryptography.fernet import Fernet
 from tkinter import messagebox
+import base64
 
 
 def Arayuz():
@@ -83,41 +83,54 @@ def UyarıArayuz():
 
     messagebox.showwarning(title="Geçersiz Değer", message="Değerleri Kontrol Edin")
 
+def encode(key, clear):
+    enc = []
+    for i in range(len(clear)):
+        key_c = key[i % len(key)]
+        enc_c = chr((ord(clear[i]) + ord(key_c)) % 256)
+        enc.append(enc_c)
+    return base64.urlsafe_b64encode("".join(enc).encode()).decode()
 
+def decode(key, enc):
+    dec = []
+    enc = base64.urlsafe_b64decode(enc).decode()
+    for i in range(len(enc)):
+        key_c = key[i % len(key)]
+        dec_c = chr((256 + ord(enc[i]) - ord(key_c)) % 256)
+        dec.append(dec_c)
+    return "".join(dec)
 
 def sifreleVeKaydetButonu():
-    global dogrusifre
-    dogrusifre = "ridvan"
-    global sifre
-    sifre = girilecekSifre.get()
-    global fernet
+
     global sifrelenmisMesaj
-
-
+    sifre = girilecekSifre.get()
     konuMetniniGetir = baslikIcerigi.get()
     textMetniniGetir = icerikText.get("1.0", "end-1c")
 
-    key = Fernet.generate_key()
-    fernet = Fernet(key)
-    sifrelenmisMesaj = fernet.encrypt(textMetniniGetir.encode())
 
-    if dogrusifre == sifre:
-        
+
+    if len(konuMetniniGetir) !=0 or len(textMetniniGetir) !=0 or len(sifre) !=0:
+
+        sifrelenmisMesaj = encode(textMetniniGetir, sifre)
+
         try:
 
             with open(r"C:\Users\VICTUS\PycharmProjects\SecretNotes\Sifreli_Icerik.txt", mode="a") as dosyaYazdır:
                     dosyaYazdır.write(konuMetniniGetir + "\n" + "\n")
 
             with open(r"C:\Users\VICTUS\PycharmProjects\SecretNotes\Sifreli_Icerik.txt", mode="a") as dosyaYazma:
-                        dosyaYazma.write(str(sifrelenmisMesaj, "utf-8") + "\n" + "\n")
+                        dosyaYazma.write((sifrelenmisMesaj) + "\n" + "\n")
+
         except FileNotFoundError:
             UyarıArayuz()
         finally:
             baslikIcerigi.delete(0,"end")
             icerikText.delete(1.0,"end")
             girilecekSifre.delete(0,"end")
+
     else:
         UyarıArayuz()
+
 def sıfreEntry():
     global girilecekSifre
 
@@ -134,36 +147,32 @@ sıfreEntry()
 
 def sifreCoz():
 
-    textMetniniGetir = icerikText.get("1.0", "end-1c")
+    sifrelenmisIcerik = icerikText.get("1.0", "end-1c")
+    sifrelenmisSifre = girilecekSifre.get()
 
-    if dogrusifre == sifre:
-
-        if textMetniniGetir == sifrelenmisMesaj:
-            try:
-                cozumlenmisMesaj = fernet.decrypt(sifrelenmisMesaj).decode()
-
-                icerikText.delete("1.0", "end-1c")
-                icerikText.insert("1.0", cozumlenmisMesaj)
-            except Exception as e:
-                UyarıArayuz()
-
-    else:
+    if len(sifrelenmisIcerik) == 0 or len(sifrelenmisSifre) == 0:
         UyarıArayuz()
-
-
+    else:
+        try:
+            cozumlenmisMesaj = decode(sifrelenmisIcerik, sifrelenmisSifre)
+            icerikText.delete("1.0", "end")
+            icerikText.insert("1.0", cozumlenmisMesaj)
+        except Exception as e:
+            print("Hata:", e)
+            UyarıArayuz()
 
 def CozumleButonu():
     cozumButonu = tkinter.Button()
     cozumButonu.config(text="Çözümle",
                        width=25,
-                       font=("Arial",9,"bold"),
+                       font=("Arial", 9, "bold"),
                        bg="yellow",
                        command=sifreCoz)
 
     cozumButonu.place(x=108, y=585)
 CozumleButonu()
 
-def KayıtButonu():
+def KayitButonu():
 
     kayitButonu = tkinter.Button()
     kayitButonu.config(text="Şifrele ve Kaydet",
@@ -173,9 +182,7 @@ def KayıtButonu():
                        command=sifreleVeKaydetButonu)
 
     kayitButonu.place(x=108, y=545)
+KayitButonu()
 
-KayıtButonu()
-
-#sifreleVeKaydetButonu()
 
 tkinter.mainloop()
